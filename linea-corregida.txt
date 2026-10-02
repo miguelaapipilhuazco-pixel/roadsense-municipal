@@ -1,0 +1,1 @@
+  db.prepare("UPDATE baches SET estado = 'REPARADO', fecha_reparacion = CURRENT_TIMESTAMP WHERE id = ?").run(bacheId); 

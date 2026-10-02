@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Supervisión</title>
+    <style>
+        :root {
+            --vino-morena: #561124;
+            --bg-gris: #f8f9fa;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-gris); color: #333; }
+        
+        header { background: var(--vino-morena); color: #ffffff; padding: 22px; text-align: center; font-size: 1.5rem; font-weight: bold; letter-spacing: -0.3px; text-transform: uppercase; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        
+        .nav-container { max-width: 1000px; margin: 15px auto 0; padding: 0 20px; }
+        .back { display: inline-flex; align-items: center; gap: 8px; color: var(--vino-morena); text-decoration: none; font-weight: bold; font-size: 0.95rem; }
+        .back-icon { width: 18px; height: 18px; filter: invert(12%) sepia(31%) saturate(4649%) hue-rotate(325deg) brightness(87%) contrast(92%); }
+
+        .container { max-width: 1000px; margin: 10px auto 50px; padding: 20px; }
+        
+        .box { 
+            background: white; 
+            padding: 22px; 
+            margin-bottom: 20px; 
+            border-left: 8px solid var(--vino-morena); 
+            border-radius: 6px; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.03); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .report-main { flex: 1; min-width: 280px; }
+        .tag { padding: 6px 14px; border-radius: 4px; color: white; font-weight: bold; font-size: 11px; text-transform: uppercase; display: inline-block; }
+        .PENDIENTE { background: var(--vino-morena); } 
+        .REPARADO { background: #28a745; }
+        
+        .bache-title { margin-left: 10px; font-size: 1.15rem; color: #111; display: inline-block; vertical-align: middle; }
+        .info { margin-top: 10px; font-size: 0.95rem; color: #555; }
+        .date-badge { font-size: 0.85rem; color: #28a745; margin-top: 6px; font-weight: 500; }
+        
+        .assignment { color: var(--vino-morena); font-weight: bold; font-size: 1.05rem; text-align: right; min-width: 180px; }
+
+        @media (max-width: 768px) {
+            header { font-size: 1.2rem; padding: 15px; }
+            .box { flex-direction: column; align-items: flex-start; padding: 18px; }
+            .assignment { text-align: left; min-width: 100%; border-top: 1px solid #eee; padding-top: 10px; margin-top: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <header>TABLERO DE CONTROL - INFRAESTRUCTURA MUNICIPAL</header>
+    <div class="nav-container">
+        <a href="/index.html" class="back">
+            <img src="https://icons8.com" class="back-icon" alt="Regresar">
+            Volver al Hub Central
+        </a>
+    </div>
+    <div class="container" id="v"></div>
+    
+    <script>
+        async function up(){
+            try {
+                const r = await fetch('/api/supervision/mapa');
+                const d = await r.json();
+                if(d.length === 0) {
+                    document.getElementById('v').innerHTML = "<div style='text-align:center; color:#777; margin-top:30px;'>No hay baches registrados actualmente.</div>";
+                    return;
+                }
+                document.getElementById('v').innerHTML = d.map(b => `
+                    <div class='box'>
+                        <div class='report-main'>
+                            <span class='tag ${b.estado}'>${b.estado}</span> 
+                            <strong class='bache-title'>Bache #${b.id}</strong> <span style="color:#666; font-size:0.9rem;">(${b.gravedad})</span>
+                            <div class='info'>📍 Coordenadas: ${b.latitud}, ${b.longitud} <br> Confirmaciones flotantes: <strong>${b.impactos_detectados}</strong></div>
+                            ${b.fecha_reparacion ? `<div class='date-badge'>✓ Atendido el: \${b.fecha_reparacion}</div>` : ''}
+                        </div>
+                        <div class='assignment'>${b.empresa_asignada}</div>
+                    </div>
+                `).join('');
+            } catch(e) {
+                document.getElementById('v').innerHTML = "<div style='text-align:center; color:red; margin-top:30px;'>Conectando al servidor core...</div>";
+            }
+        }
+        setInterval(up,2000); up();
+    </script>
+</body>
+</html>
