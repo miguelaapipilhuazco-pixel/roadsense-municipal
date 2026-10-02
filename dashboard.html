@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Obras Públicas - Alta Velocidad</title>
+    <title>Dashboard Obras Públicas - Control Municipal</title>
     <style>
         :root {
             --vino-morena: #561124;
@@ -16,8 +16,9 @@
         
         .nav-container { max-width: 1200px; margin: 15px auto 0; padding: 0 20px; }
         .back { display: inline-flex; align-items: center; gap: 8px; color: var(--vino-morena); text-decoration: none; font-weight: bold; font-size: 0.95rem; }
+        /* Corrección del icono roto: Usamos un SVG nativo embebido en el CSS */
+        .back-icon { width: 18px; height: 18px; fill: var(--vino-morena); }
 
-        /* KPIS DE AUDITORÍA MUNICIPAL */
         .kpi-container { max-width: 1200px; margin: 15px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
         .kpi-card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border-top: 4px solid var(--vino-morena); text-align: center; }
         .kpi-card h4 { font-size: 0.9rem; color: #666; text-transform: uppercase; margin-bottom: 5px; }
@@ -26,7 +27,6 @@
         .main-layout { max-width: 1200px; margin: 10px auto 50px; padding: 20px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 20px; }
         .panel-lista { max-height: 550px; overflow-y: auto; padding-right: 5px; }
         
-        /* Contenedor del Mapa Vectorial Ultrarrápido */
         #mapa-vectorial { 
             height: 550px; 
             border-radius: 8px; 
@@ -37,17 +37,15 @@
             overflow: hidden;
         }
         .v-grid { position: absolute; width: 100%; height: 100%; background-image: linear-gradient(#d8dee9 1px, transparent 1px), linear-gradient(90deg, #d8dee9 1px, transparent 1px); background-size: 40px 40px; }
-        .calle-linea { stroke-width: 6; stroke-linecap: round; opacity: 0.85; transition: stroke 0.3s; }
+        .calle-linea { stroke-width: 6; stroke-linecap: round; opacity: 0.85; }
         
         .box { background: white; padding: 18px; margin-bottom: 12px; border-left: 6px solid var(--vino-morena); border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 6px; cursor: pointer; }
-        .box:hover { background: #fffcfd; }
         
         .tag { padding: 4px 10px; border-radius: 4px; color: white; font-weight: bold; font-size: 10px; text-transform: uppercase; display: inline-block; }
         .PENDIENTE { background: var(--vino-morena); } .REPARADO { background: #28a745; }
-        .CRÍTICO { color: #dc3545; font-weight: bold; } .REGULAR { color: #ffc107; font-weight: bold; }
         
         .info { font-size: 0.9rem; color: #555; }
-        .assignment { font-size: 0.9rem; font-weight: bold; color: var(--vino-morena); margin-top: 5px; border-top: 1px dashed #eee; padding-top: 5px; }
+        .assignment { font-size: 0.9rem; font-weight: bold; color: var(--vino-morena); margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; }
 
         @media (max-width: 900px) {
             .main-layout { grid-template-columns: 1fr; }
@@ -59,10 +57,12 @@
     <header>DIRECCIÓN DE OBRAS PÚBLICAS - AUDITORÍA VIAL INTEGRAL</header>
     
     <div class="nav-container">
-        <a href="/index.html" class="back">Volver al Hub Central</a>
+        <a href="/index.html" class="back">
+            <svg class="back-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Volver al Hub Central
+        </a>
     </div>
 
-    <!-- TABLERO DE CONTROL -->
     <div class="kpi-container">
         <div class="kpi-card"><h4>Alertas Críticas</h4><div class="num" id="kpi-criticos">0</div></div>
         <div class="kpi-card"><h4>Reportes Pendientes</h4><div class="num" id="kpi-pendientes">0</div></div>
@@ -71,8 +71,9 @@
     </div>
     
     <div class="main-layout">
-        <div class="panel-lista" id="v"></div>
-        <!-- Mapa de Calles en SVG Puro (Carga en milisegundos) -->
+        <div class="panel-lista" id="v">
+            <div style="text-align:center; color:#666; padding-top:20px;">Estabilizando conexión de datos abiertos...</div>
+        </div>
         <div id="mapa-vectorial">
             <div class="v-grid"></div>
             <svg id="svg-vial" width="100%" height="100%" style="position:absolute; top:0; left:0;"></svg>
@@ -83,12 +84,12 @@
         async function up(){
             try {
                 const r = await fetch('/api/supervision/mapa');
+                if (!r.ok) throw new Error('Error de base de datos');
                 const d = await r.json();
                 
-                // KPIs rápidos
                 let pendientes = d.filter(b => b.estado === 'PENDIENTE').length;
                 let reparados = d.filter(b => b.estado === 'REPARADO').length;
-                let criticos = d.filter(b => b.estado === 'GRAVE' || b.gravedad === 'CRÍTICO').length;
+                let criticos = d.filter(b => b.gravedad === 'CRÍTICO').length;
                 let eficiencia = d.length ? Math.round((reparados / d.length) * 100) : 0;
 
                 document.getElementById('kpi-pendientes').innerText = pendientes;
@@ -97,39 +98,27 @@
                 document.getElementById('kpi-eficiencia').innerText = eficiencia + "%";
 
                 const svg = document.getElementById('svg-vial');
-                svg.innerHTML = ''; // Limpiar mapa anterior
+                svg.innerHTML = ''; 
 
                 if(d.length === 0) {
-                    document.getElementById('v').innerHTML = "<div style='text-align:center; color:#777; padding-top:20px;'>No hay baches registrados en la jurisdicción.</div>";
+                    document.getElementById('v').innerHTML = "<div style='text-align:center; color:#777; padding-top:20px;'>Jurisdicción limpia. No hay reportes de baches registrados hoy.</div>";
                     return;
                 }
 
-                // Generar red de calles virtual basada en las coordenadas reales de la base de datos
                 d.forEach((b, index) => {
-                    let colorCalle = '#28a745'; // Verde (Solucionado)
-                    if (b.estado === 'PENDIENTE') {
-                        colorCalle = b.impactos_detectados >= 5 ? '#561124' : '#ffc107'; // Rojo o Amarillo
-                    }
-
-                    // Trazar línea de calle en SVG de alta velocidad
+                    let colorCalle = b.estado === 'PENDIENTE' ? (b.impactos_detectados >= 5 ? '#561124' : '#ffc107') : '#28a745';
                     const yPos = 50 + (index * 60) % 450;
+                    
                     const linea = document.createElementNS("http://w3.org", "line");
-                    linea.setAttribute("x1", "20");
-                    linea.setAttribute("y1", yPos);
-                    linea.setAttribute("x2", "90%");
-                    linea.setAttribute("y2", yPos);
-                    linea.setAttribute("class", "calle-linea");
-                    linea.setAttribute("stroke", colorCalle);
+                    linea.setAttribute("x1", "20"); linea.setAttribute("y1", yPos);
+                    linea.setAttribute("x2", "90%"); linea.setAttribute("y2", yPos);
+                    linea.setAttribute("class", "calle-linea"); linea.setAttribute("stroke", colorCalle);
                     svg.appendChild(linea);
 
-                    // Nodo central del bache
                     const circulo = document.createElementNS("http://w3.org", "circle");
-                    circulo.setAttribute("cx", "50%");
-                    circulo.setAttribute("cy", yPos);
-                    circulo.setAttribute("r", b.estado === 'PENDIENTE' ? "10" : "7");
-                    circulo.setAttribute("fill", colorCalle);
-                    circulo.setAttribute("stroke", "#ffffff");
-                    circulo.setAttribute("stroke-width", "2");
+                    circulo.setAttribute("cx", "50%"); circulo.setAttribute("cy", yPos);
+                    circulo.setAttribute("r", "8"); circulo.setAttribute("fill", colorCalle);
+                    circulo.setAttribute("stroke", "#ffffff"); circulo.setAttribute("stroke-width", "2");
                     svg.appendChild(circulo);
                 });
 
@@ -137,20 +126,17 @@
                     <div class='box'>
                         <div>
                             <span class='tag ${b.estado}'>${b.estado}</span> 
-                            <strong style="margin-left:5px;">Reporte #${b.id}</strong> - Prioridad: <span class='${b.gravedad}'>${b.gravedad}</span>
+                            <strong style="margin-left:5px;">Reporte #${b.id}</strong> (${b.gravedad})
                         </div>
-                        <div class='info'>
-                            📍 Coordenadas: ${b.latitud}, ${b.longitud}<br>
-                            🚗 Vehículos que confirman: <strong>${b.impactos_detectados}</strong>
-                        </div>
-                        <div class='assignment'>👷 Responsable: ${b.empresa_asignada}</div>
+                        <div class='info'>📍 Ubicación: ${b.latitud}, ${b.longitud}<br>Validaciones: <strong>${b.impactos_detectados} vehículos</strong></div>
+                        <div class='assignment'>👷 Empresa responsable: ${b.empresa_asignada}</div>
                     </div>
                 `).join('');
             } catch(e) {
-                document.getElementById('v').innerHTML = "<div style='text-align:center; color:red; padding-top:20px;'>Estabilizando canal de datos en la nube...</div>";
+                document.getElementById('v').innerHTML = "<div style='text-align:center; color:#561124; font-weight:bold; padding-top:20px;'>⚠️ Esperando inicialización. Ejecuta la ruta /api/db/init en otra pestaña.</div>";
             }
         }
-        setInterval(up, 2000); up();
+        setInterval(up, 3000); up();
     </script>
 </body>
 </html>
