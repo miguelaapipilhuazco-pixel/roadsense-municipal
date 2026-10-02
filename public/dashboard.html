@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Supervisión</title>
+    <title>Dashboard Obras Públicas - Bienestar Vial</title>
+    <!-- Leaflet CSS y Plugin de Calor Open Source -->
+    <link rel="stylesheet" href="https://unpkg.com" />
     <style>
         :root {
             --vino-morena: #561124;
@@ -14,79 +16,161 @@
         
         header { background: var(--vino-morena); color: #ffffff; padding: 22px; text-align: center; font-size: 1.5rem; font-weight: bold; letter-spacing: -0.3px; text-transform: uppercase; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
         
-        .nav-container { max-width: 1000px; margin: 15px auto 0; padding: 0 20px; }
+        .nav-container { max-width: 1200px; margin: 15px auto 0; padding: 0 20px; }
         .back { display: inline-flex; align-items: center; gap: 8px; color: var(--vino-morena); text-decoration: none; font-weight: bold; font-size: 0.95rem; }
         .back-icon { width: 18px; height: 18px; filter: invert(12%) sepia(31%) saturate(4649%) hue-rotate(325deg) brightness(87%) contrast(92%); }
 
-        .container { max-width: 1000px; margin: 10px auto 50px; padding: 20px; }
-        
-        .box { 
-            background: white; 
-            padding: 22px; 
-            margin-bottom: 20px; 
-            border-left: 8px solid var(--vino-morena); 
-            border-radius: 6px; 
-            box-shadow: 0 3px 10px rgba(0,0,0,0.03); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .report-main { flex: 1; min-width: 280px; }
-        .tag { padding: 6px 14px; border-radius: 4px; color: white; font-weight: bold; font-size: 11px; text-transform: uppercase; display: inline-block; }
-        .PENDIENTE { background: var(--vino-morena); } 
-        .REPARADO { background: #28a745; }
-        
-        .bache-title { margin-left: 10px; font-size: 1.15rem; color: #111; display: inline-block; vertical-align: middle; }
-        .info { margin-top: 10px; font-size: 0.95rem; color: #555; }
-        .date-badge { font-size: 0.85rem; color: #28a745; margin-top: 6px; font-weight: 500; }
-        
-        .assignment { color: var(--vino-morena); font-weight: bold; font-size: 1.05rem; text-align: right; min-width: 180px; }
+        /* KPIS DE AUDITORÍA MUNICIPAL */
+        .kpi-container { max-width: 1200px; margin: 15px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .kpi-card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border-top: 4px solid var(--vino-morena); text-align: center; }
+        .kpi-card h4 { font-size: 0.9rem; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+        .kpi-card .num { font-size: 1.8rem; font-weight: bold; color: var(--vino-morena); }
 
-        @media (max-width: 768px) {
-            header { font-size: 1.2rem; padding: 15px; }
-            .box { flex-direction: column; align-items: flex-start; padding: 18px; }
-            .assignment { text-align: left; min-width: 100%; border-top: 1px solid #eee; padding-top: 10px; margin-top: 5px; }
+        .main-layout { max-width: 1200px; margin: 10px auto 50px; padding: 20px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 20px; }
+        
+        .panel-lista { max-height: 550px; overflow-y: auto; padding-right: 5px; }
+        
+        #mapa { height: 550px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 2px solid var(--vino-morena); z-index: 1; }
+        
+        .box { background: white; padding: 18px; margin-bottom: 12px; border-left: 6px solid var(--vino-morena); border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 6px; cursor: pointer; }
+        .box:hover { background: #fffcfd; }
+        
+        .tag { padding: 4px 10px; border-radius: 4px; color: white; font-weight: bold; font-size: 10px; text-transform: uppercase; display: inline-block; }
+        .PENDIENTE { background: var(--vino-morena); } .REPARADO { background: #28a745; }
+        .CRÍTICO { color: #dc3545; font-weight: bold; } .REGULAR { color: #ffc107; font-weight: bold; }
+        
+        .info { font-size: 0.9rem; color: #555; }
+        .assignment { font-size: 0.9rem; font-weight: bold; color: var(--vino-morena); margin-top: 5px; border-top: 1px dashed #eee; padding-top: 5px; }
+
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            #mapa { height: 380px; }
         }
     </style>
 </head>
 <body>
-    <header>TABLERO DE CONTROL - INFRAESTRUCTURA MUNICIPAL</header>
+    <header>DIRECCIÓN DE OBRAS PÚBLICAS - AUDITORÍA VIAL INTEGRAL</header>
+    
     <div class="nav-container">
         <a href="/index.html" class="back">
             <img src="https://icons8.com" class="back-icon" alt="Regresar">
             Volver al Hub Central
         </a>
     </div>
-    <div class="container" id="v"></div>
+
+    <!-- TABLERO DE CONTROL DE PROCESOS CON EMPRESAS -->
+    <div class="kpi-container">
+        <div class="kpi-card"><h4>Alertas Críticas</h4><div class="num" id="kpi-criticos">0</div></div>
+        <div class="kpi-card"><h4>Reportes Pendientes</h4><div class="num" id="kpi-pendientes">0</div></div>
+        <div class="kpi-card"><h4>Vialidades Solucionadas</h4><div class="num" style="color:#28a745;" id="kpi-reparados">0</div></div>
+        <div class="kpi-card"><h4>Eficiencia Municipal</h4><div class="num" style="color:#dfb15b;" id="kpi-eficiencia">0%</div></div>
+    </div>
     
+    <div class="main-layout">
+        <!-- Lista de Auditoría -->
+        <div class="panel-lista" id="v"></div>
+        <!-- Mapa de Calor y Tramos Inteligente -->
+        <div id="mapa"></div>
+    </div>
+    
+    <script src="https://unpkg.com"></script>
     <script>
+        const map = L.map('mapa').setView([19.4326, -99.1332], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let capasLayer = L.layerGroup().addTo(map);
+
+        function enfocarBache(lat, lon) {
+            map.setView([lat, lon], 16, { animate: true });
+        }
+
         async function up(){
             try {
                 const r = await fetch('/api/supervision/mapa');
                 const d = await r.json();
+                
+                capasLayer.clearLayers();
+
+                // Cálculos de KPIs de Obras Públicas en Vivo
+                let pendientes = d.filter(b => b.estado === 'PENDIENTE').length;
+                let reparados = d.filter(b => b.estado === 'REPARADO').length;
+                let criticos = d.filter(b => b.estado === 'PENDIENTE' && b.gravedad === 'CRÍTICO').length;
+                let eficiencia = d.length ? Math.round((reparados / d.length) * 100) : 0;
+
+                document.getElementById('kpi-pendientes').innerText = pendientes;
+                document.getElementById('kpi-reparados').innerText = reparados;
+                document.getElementById('kpi-criticos').innerText = criticos;
+                document.getElementById('kpi-eficiencia').innerText = eficiencia + "%";
+
                 if(d.length === 0) {
-                    document.getElementById('v').innerHTML = "<div style='text-align:center; color:#777; margin-top:30px;'>No hay baches registrados actualmente.</div>";
+                    document.getElementById('v').innerHTML = "<div style='text-align:center; color:#777; padding-top:20px;'>No hay baches registrados en la jurisdicción.</div>";
                     return;
                 }
-                document.getElementById('v').innerHTML = d.map(b => `
-                    <div class='box'>
-                        <div class='report-main'>
-                            <span class='tag ${b.estado}'>${b.estado}</span> 
-                            <strong class='bache-title'>Bache #${b.id}</strong> <span style="color:#666; font-size:0.9rem;">(${b.gravedad})</span>
-                            <div class='info'>📍 Coordenadas: ${b.latitud}, ${b.longitud} <br> Confirmaciones flotantes: <strong>${b.impactos_detectados}</strong></div>
-                            ${b.fecha_reparacion ? `<div class='date-badge'>✓ Atendido el: \${b.fecha_reparacion}</div>` : ''}
+
+                document.getElementById('v').innerHTML = d.map(b => {
+                    const latNum = parseFloat(b.latitud);
+                    const lonNum = parseFloat(b.longitud);
+
+                    if (!isNaN(latNum) && !isNaN(lonNum)) {
+                        // LÓGICA DE CALOR Y TRAMOS VIALES: Coloreado dinámico según estatus e impactos
+                        let colorTramo = '#28a745'; // Verde por defecto (Solucionado)
+                        let radioCalor = 12;
+
+                        if (b.estado === 'PENDIENTE') {
+                            // Si tiene más de 5 impactos de autos, la calle está muy recorrida y dañada -> ROJO CRÍTICO
+                            if (b.impactos_detectados >= 5 || b.gravedad === 'CRÍTICO') {
+                                colorTramo = '#561124'; // Rojo morena/vino
+                                radioCalor = 25; // El radio se expande (Simula calle afectada)
+                            } else {
+                                colorTramo = '#ffc107'; // Amarillo (Regular/Advertencia)
+                                radioCalor = 16;
+                            }
+                        }
+
+                        // Pintar la zona de afectación en las calles del mapa mundial
+                        L.circle([latNum, lonNum], {
+                            radius: radioCalor * 2, // Se adapta al daño real de la calle
+                            fillColor: colorTramo,
+                            color: colorTramo,
+                            weight: 1,
+                            fillOpacity: 0.45
+                        }).addTo(capasLayer);
+
+                        // Marcador de núcleo para auditoría
+                        L.circleMarker([latNum, lonNum], {
+                            radius: 6,
+                            fillColor: colorTramo,
+                            color: '#ffffff',
+                            weight: 2,
+                            fillOpacity: 1
+                        }).addTo(capasLayer)
+                          .bindPopup(`<b>Reporte #${b.id}</b><br>Estatus: ${b.estado}<br>Pasadas de autos: ${b.impactos_detectados}<br>Cuadrilla: ${b.empresa_asignada}`);
+                    }
+
+                    return `
+                        <div class='box' onclick='enfocarBache(${latNum}, ${lonNum})'>
+                            <div>
+                                <span class='tag ${b.estado}'>${b.estado}</span> 
+                                <strong style="margin-left:5px;">Reporte #${b.id}</strong> - Prioridad: <span class='${b.gravedad}'>${b.gravedad}</span>
+                            </div>
+                            <div class='info'>
+                                📍 GPS: ${b.latitud}, ${b.longitud}<br>
+                                🚗 Flotas que validan el daño: <strong>${b.impactos_detectados} vehículos</strong>
+                            </div>
+                            ${b.fecha_reparacion ? `<div class='date-badge'>✓ Resuelto e Inspeccionado: \${b.fecha_reparacion}</div>` : ''}
+                            <div class='assignment'>👷 Responsable: ${b.empresa_asignada}</div>
                         </div>
-                        <div class='assignment'>${b.empresa_asignada}</div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             } catch(e) {
-                document.getElementById('v').innerHTML = "<div style='text-align:center; color:red; margin-top:30px;'>Conectando al servidor core...</div>";
+                document.getElementById('v').innerHTML = "<div style='text-align:center; color:red; padding-top:20px;'>Actualizando panel de control...</div>";
             }
         }
-        setInterval(up,2000); up();
+        setInterval(up, 4000); up();
     </script>
 </body>
 </html>
