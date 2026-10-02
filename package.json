@@ -13,6 +13,7 @@
   "dependencies": {
     "@fastify/formbody": "^9.0.0",
     "@fastify/static": "^10.1.5",
+    "@vercel/postgres": "^0.10.0",
     "better-sqlite3": "^13.0.3",
     "fastify": "^5.12.5",
     "undici": "^8.11.2"
