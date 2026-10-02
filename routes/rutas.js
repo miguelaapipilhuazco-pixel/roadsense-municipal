@@ -1,43 +1,87 @@
-const db = require('../config/database');
+const { sql } = require('@vercel/postgres');
 const fs = require('fs');
 const path = require('path');
 
 function inicializarRutas(fastify, opts, next) {
-  fastify.get('/api/descargar/database', async (req, res) => {
-    const rutaDB = path.join(__dirname, '..', 'roadsense.db');
-    if (fs.existsSync(rutaDB)) {
-      res.header('Content-Disposition', 'attachment; filename=roadsense_backup.db');
-      res.type('application/x-sqlite3');
-      return fs.createReadStream(rutaDB);
-    } else {
-      return res.status(404).send({ error: 'Archivo no encontrado' });
+  // 📥 Inicialización de la Tabla en la Nube (Endpoint de Control)
+  fastify.get('/api/db/init', async (req, res) => {
+    try {
+      await sql`
+        CREATE TABLE IF NOT EXISTS baches (
+          id SERIAL PRIMARY KEY,
+          latitud TEXT NOT NULL,
+          longitud TEXT NOT NULL,
+          gravedad TEXT NOT NULL,
+          estado TEXT DEFAULT 'PENDIENTE',
+          impactos_detectados INTEGER DEFAULT 1,
+          empresa_asignada TEXT NOT NULL,
+          fecha_deteccion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          fecha_reparacion TEXT DEFAULT NULL
+        );
+      `;
+      return { status: 'Base de datos Postgres inicializada en la nube de Vercel.' };
+    } catch (error) {
+      return res.status(500).send({ error: error.message });
     }
   });
 
+  // 🚗 API 1: Recibir Telemetría de los vehículos (Escáner de fondo)
   fastify.post('/api/telemetria', async (req, res) => {
     const { latitud, longitud, fuerza } = req.body;
     if (!latitud || !longitud || !fuerza) return res.status(400).send({ error: 'Datos incompletos' });
+    
+    try {
+      const latNum = parseFloat(latitud);
+      const lonNum = parseFloat(longitud);
+      const margen = 0.0001;
 
-    const margen = 0.0001;
-    const existente = db.prepare("SELECT id FROM baches WHERE ABS(latitud - ?) < ? AND ABS(longitud - ?) < ? AND estado = 'PENDIENTE'").get(latitud, margen, longitud, margen);
+      // Filtro de Inteligencia Serverless Postgres
+      const { rows } = await sql`
+        SELECT id, impactos_detectados FROM baches 
+        WHERE ABS(CAST(latitud AS DOUBLE PRECISION) - ${latNum}) < ${margen} 
+        AND ABS(CAST(longitud AS DOUBLE PRECISION) - ${lonNum}) < ${margen} 
+        AND estado = 'PENDIENTE' 
+        LIMIT 1;
+      `;
 
-    if (existente) {
-      db.prepare("UPDATE baches SET impactos_detectados = impactos_detectados + 1 WHERE id = ?").run(existente.id);
-      return { status: 'confirmacion', id: existente.id };
-    } else {
-      const gravedad = fuerza >= 7 ? 'CRÍTICO' : 'REGULAR';
-      const empresa = latitud > 19.4326 ? 'Cuadrilla Sector Norte' : 'Cuadrilla Sector Sur';
-      db.prepare("INSERT INTO baches (latitud, longitud, gravedad, empresa_asignada) VALUES (?, ?, ?, ?)").run(latitud, longitud, gravedad, empresa);
-      return { status: 'creado', asignado_a: empresa };
+      if (rows.length > 0) {
+        const bacheId = rows[0].id;
+        await sql`UPDATE baches SET impactos_detectados = impactos_detectados + 1 WHERE id = ${bacheId};`;
+        return { status: 'confirmacion', id: bacheId };
+      } else {
+        const gravedad = fuerza >= 7 ? 'CRÍTICO' : 'REGULAR';
+        const empresa = latNum > 19.4326 ? 'Cuadrilla Sector Norte' : 'Cuadrilla Sector Sur';
+        
+        await sql`
+          INSERT INTO baches (latitud, longitud, gravedad, empresa_asignada) 
+          VALUES (${latitud.toString()}, ${longitud.toString()}, ${gravedad}, ${empresa});
+        `;
+        return { status: 'creado', asignado_a: empresa };
+      }
+    } catch (error) {
+      return res.status(500).send({ error: error.message });
     }
   });
 
-  fastify.get('/api/supervision/mapa', async () => db.prepare("SELECT * FROM baches ORDER BY estado DESC, id DESC").all());
-  fastify.get('/api/contratista/:empresa', async (req) => db.prepare("SELECT * FROM baches WHERE empresa_asignada = ? AND estado = 'PENDIENTE'").all(req.params.empresa));
+  // 📡 APIs para el Tablero de Control y Cuadrillas
+  fastify.get('/api/supervision/mapa', async () => {
+    const { rows } = await sql`SELECT * FROM baches ORDER BY estado DESC, id DESC;`;
+    return rows;
+  });
+
+  fastify.get('/api/contratista/:empresa', async (req) => {
+    const { rows } = await sql`SELECT * FROM baches WHERE empresa_asignada = ${req.params.empresa} AND estado = 'PENDIENTE';`;
+    return rows;
+  });
   
   fastify.post('/api/contratista/reparar', async (req, res) => {
-    db.prepare("UPDATE baches SET estado = 'REPARADO', fecha_reparacion = datetime('now','localtime') WHERE id = ?").run(req.body.id);
-    return { status: 'exito' };
+    try {
+      const fechaActual = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
+      await sql`UPDATE baches SET estado = 'REPARADO', fecha_reparacion = ${fechaActual} WHERE id = ${req.body.id};`;
+      return { status: 'exito' };
+    } catch (error) {
+      return res.status(500).send({ error: error.message });
+    }
   });
 
   next();
