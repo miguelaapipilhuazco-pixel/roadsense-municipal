@@ -1,21 +1,10 @@
 {
-  "name": "api-core",
+  "name": "roadsense-municipal",
   "version": "1.0.0",
-  "description": "",
-  "main": "probar-flujo.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "description": "Sistema de telemetria vial e infraestructura municipal",
+  "main": "api/index.js",
   "dependencies": {
-    "@fastify/formbody": "^9.0.0",
-    "@fastify/static": "^10.1.5",
-    "@vercel/postgres": "^0.10.0",
-    "better-sqlite3": "^13.0.3",
-    "fastify": "^5.12.5",
-    "undici": "^8.11.2"
+    "@vercel/postgres": "^0.10.0"
   }
 }
+
