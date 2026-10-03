@@ -5,28 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Portal Bienestar Vial</title>
     <style>
-        :root { --vino-morena: #561124; --vino-hover: #3d0c19; --bg-gris: #f8f9fa; }
+        :root {
+            --vino-morena: #561124;
+            --vino-hover: #3d0c19;
+            --bg-gris: #f8f9fa;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-gris); color: #333; line-height: 1.6; }
-        header { background: var(--vino-morena); padding: 45px 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-bottom: 3px solid rgba(255,255,255,0.1); }
+        
+        header { 
+            background: var(--vino-morena); 
+            padding: 45px 20px; 
+            text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            border-bottom: 3px solid rgba(255,255,255,0.1); 
+        }
         header h1 { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.5px; text-transform: uppercase; color: #ffffff; }
-        .sub { color: #ffffff; font-size: 1rem; margin: 12px auto 0; font-weight: 400; letter-spacing: 1.5px; text-transform: uppercase; background: rgba(255, 255, 255, 0.08); display: inline-block; padding: 6px 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); }
+        
+        .sub { 
+            color: #ffffff; 
+            font-size: 1rem; 
+            margin: 12px auto 0; 
+            font-weight: 400; 
+            letter-spacing: 1.5px; 
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.08);
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
         h2 { text-align: center; margin: 45px 20px 20px; color: var(--vino-morena); font-weight: 700; font-size: 1.8rem; }
-        .container { max-width: 1200px; margin: 0 auto 30px; padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; }
-        .card { background: white; padding: 35px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-top: 6px solid var(--vino-morena); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto 60px; 
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+        }
+        
+        .card { 
+            background: white; 
+            padding: 35px 24px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+            border-top: 6px solid var(--vino-morena); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
         .card:hover { transform: translateY(-5px); }
-        .card-header-icon { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
-        .morena-svg-icon { width: 42px; height: 42px; fill: var(--vino-morena); }
+        
+        .card-header-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .morena-svg-icon {
+            width: 42px;
+            height: 42px;
+            fill: var(--vino-morena); /* Íconos pintados de forma nativa en color guinda */
+        }
+        
         .card-content h3 { margin-bottom: 12px; color: var(--vino-morena); font-size: 1.3rem; font-weight: 700; }
         .card-content p { font-size: 0.95rem; color: #666; margin-bottom: 25px; text-align: justify; }
-        .btn { background: var(--vino-morena); color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; font-size: 0.95rem; text-align: center; display: block; border:none; width:100%; cursor:pointer; }
-        .btn:hover { background: var(--vino-hover); }
         
-        /* DISEÑO FORMULARIO SIMULADOR DE AUTO */
-        .sim-container { max-width: 500px; margin: 0 auto 60px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid var(--vino-morena); }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--vino-morena); }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        .btn { 
+            background: var(--vino-morena); 
+            color: #ffffff; 
+            text-decoration: none; 
+            padding: 12px 20px; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            font-size: 0.95rem; 
+            text-align: center;
+            display: block;
+        }
+        .btn:hover { background: var(--vino-hover); }
+
+        @media (max-width: 480px) {
+            header h1 { font-size: 1.5rem; }
+            .sub { font-size: 0.85rem; }
+            h2 { font-size: 1.3rem; }
+            .container { padding: 10px; gap: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -38,83 +107,53 @@
     <h2>Ecosistema Integral de la Transformación Vial</h2>
     
     <div class="container">
+        <!-- 1. LA BASE DE DATOS -->
         <div class="card">
             <div class="card-content">
                 <div class="card-header-icon">
                     <svg class="morena-svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 4.02 2 6.5v11c0 2.48 4.48 4.5 10 4.5s10-2.02 10-4.5v-11C22 4.02 17.52 2 12 2zm0 18c-4.42 0-8-1.57-8-3.5V15c1.82 1.29 4.74 2 8 2s6.18-.71 8-2v1.5c0 1.93-3.58 3.5-8 3.5zm0-4.5c-4.42 0-8-1.57-8-3.5V10.5c1.82 1.29 4.74 2 8 2s6.18-.71 8-2V12c0 1.93-3.58 3.5-8 3.5zm0-4.5c-4.42 0-8-1.57-8-3.5S7.58 4 12 4s8 1.57 8 3.5-3.58 3.5-8 3.5z"/></svg>
                 </div>
                 <h3>Base de Datos</h3>
-                <p>Descarga un respaldo completo en formato estructurado JSON extraído de la nube relacional de forma inmediata.</p>
+                <p>Descarga un respaldo completo en formato estructurado JSON extraído de la nube relacional de forma inmediata para auditorías o transparencia local.</p>
             </div>
             <a href="/api/descargar/database" class="btn">Descargar DB</a>
         </div>
 
+        <!-- 2. DASHBOARD WEB -->
         <div class="card">
             <div class="card-content">
                 <div class="card-header-icon">
                     <svg class="morena-svg-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
                 </div>
                 <h3>Dashboard Web</h3>
-                <p>Módulo de supervisión en tiempo real para el Ayuntamiento. Monitoreo de infraestructura vial y fiscalización.</p>
+                <p>Módulo de supervisión en tiempo real para el Ayuntamiento. Diseñado para el monitoreo analítico de vialidades y el control de procesos.</p>
             </div>
             <a href="/dashboard.html" class="btn">Abrir Panel</a>
         </div>
 
+        <!-- 3. APP DE CUADRILLAS -->
         <div class="card">
             <div class="card-content">
                 <div class="card-header-icon">
                     <svg class="morena-svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2v1h2c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h2V4c0-1.1.9-2 2-2zm2 10h-4v2h4v-2zm0 4h-4v2h4v-2z"/></svg>
                 </div>
                 <h3>App Cuadrillas</h3>
-                <p>Plataforma web autoadaptable para trabajadores en campo. Recepción de alertas y órdenes de trabajo sectorizadas.</p>
+                <p>Plataforma web autoadaptable para trabajadores y contratistas en campo. Recepción inmediata de alertas del sector y órdenes de trabajo.</p>
             </div>
             <a href="/contratista.html" class="btn">Acceder Módulo</a>
         </div>
-    </div>
 
-    <!-- SECCIÓN INTERACTIVA: SIMULADOR DE AUTO EN VIVO -->
-    <h2>🚗 Módulo Móvil: Simulador de Trayecto Vehicular</h2>
-    <div class="sim-container">
-        <div class="form-group">
-            <label>📍 Coordenada Latitud</label>
-            <input type="text" id="lat" value="19.4410">
+        <!-- 4. APP MÓVIL DE LOS AUTOS -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-header-icon">
+                    <svg class="morena-svg-icon" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1s.67-1 1-1 1.5.67 1.5 1-.67 1-1.5 1zm11 0c-.83 0-1.5-.67-1.5-1s.67-1 1.5-1 1.5.67 1.5 1-.67 1-1.5 1zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+                </div>
+                <h3>App para Autos</h3>
+                <p>Descarga el instalador oficial APK para desplegar en la flotilla vehicular pública municipal e iniciar el escáner inteligente autónomo de fondo.</p>
+            </div>
+            <a href="#" class="btn" onclick="alert('Descargando RoadSense_Recoleccion_v1.apk (Simulado)')">Descargar APK</a>
         </div>
-        <div class="form-group">
-            <label>📍 Coordenada Longitud</label>
-            <input type="text" id="lon" value="-99.1230">
-        </div>
-        <div class="form-group">
-            <label>📊 Impacto Acelerómetro Eje Z (Escala 1-10)</label>
-            <input type="number" id="fuerza" value="8" min="1" max="10">
-        </div>
-        <button class="btn" onclick="simularImpacto()">Simular Caída en Bache</button>
-        <div id="status-envio" style="margin-top:15px; font-weight:bold; text-align:center;"></div>
     </div>
-
-    <script>
-        async function simularImpacto() {
-            const statusDiv = document.getElementById('status-envio');
-            statusDiv.style.color = '#333';
-            statusDiv.innerText = 'Transmitiendo telemetría a la nube...';
-            
-            try {
-                const r = await fetch('/api/telemetria', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        latitud: document.getElementById('lat').value,
-                        longitud: document.getElementById('lon').value,
-                        fuerza: document.getElementById('fuerza').value
-                    })
-                });
-                const res = await r.json();
-                statusDiv.style.color = 'green';
-                statusDiv.innerText = '✓ Reporte guardado con éxito. Estado: ' + res.status;
-            } catch(e) {
-                statusDiv.style.color = 'red';
-                statusDiv.innerText = '❌ Error de red con el backend serverless.';
-            }
-        }
-    </script>
 </body>
 </html>
